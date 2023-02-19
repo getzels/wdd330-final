@@ -14,8 +14,30 @@
     <header id="mainHeader">
       
     </header>
-    <main id="weather">
-      
+    <main>
+      <div id="weather">
+
+      </div>
+      <form name="location">
+        <fieldset title="Location">
+          <legend>Find by location</legend>
+          <label for="latitude">
+            Latitude: 
+            <input type="text" name="latitude" id="lititude">
+          </label>
+          <label for="longitude">
+            Longitude: 
+            <input type="text" name="longitude" id="longitude">
+          </label>
+          <input class="button" type="button" id="locationBtn" name="locationBtn" value="Find">
+
+          <label for="countries">
+            <select name="countries" id="countries">
+              <option value="#" >Select a country</option>
+            </select>
+          </label>
+        </fieldset>
+      </form>
     </main>
     <footer id="mainFooter">
       

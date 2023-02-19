@@ -1,4 +1,4 @@
-
+import { setLocalStorage, getLocalStorage } from "./utils.mjs";
 
 const countriesEndPoint = "https://restcountries.com/v3.1/all";
 const openWeatherBaseURL = "https://api.openweathermap.org/data/2.5/";
@@ -32,12 +32,17 @@ export default class ExternalServices {
         if(navigator.geolocation) {
                
             navigator.geolocation.getCurrentPosition((location) => {
-                this.lat = location.coords.latitude; 
-                this.lon = location.coords.longitude;
+            if (location !== undefined) {
+                setLocalStorage("location", {"latitude" : location.coords.latitude, "longitude" : location.coords.longitude});
+                console.log(location.coords);
+            }
+                
         });
          } else {
             alert("Sorry, browser does not support geolocation!");
          }
+
+         console.log(this.lat);
     }
 
     async getListAllCountries() {
@@ -61,10 +66,10 @@ export default class ExternalServices {
     async hourlyForecastData (lat, lon) {
 
         if (lat === undefined || lon === undefined) {
-            lat = this.lat;
-            lon = this.lon;
+            const location = getLocalStorage("location");
+            lat = location.latitude;
+            lon = location.longitude;
         }
-
 
         const response = await fetch(openWeatherBaseURL + `forecast?lat=${lat}&lon=${lon}&appid=${APIKey}`);
         const data = await convertToJson(response);
@@ -74,6 +79,12 @@ export default class ExternalServices {
     async findCountryInfo(name, limit) {
         this.location = {};
         const response = await fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${name}&limit=${limit}&appid=${APIKey}`);
+        const data = await convertToJson(response);
+        return data;
+    }
+
+    async findAllCountry() {
+        const response = await fetch(countriesEndPoint);
         const data = await convertToJson(response);
         return data;
     }
