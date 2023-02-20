@@ -1,23 +1,36 @@
-import { loadHeaderFooter } from "./utils.mjs";
+import { loadHeaderFooter, formDataToJSON } from "./utils.mjs";
 import ExternalServices from "./ExternalServices.mjs";
+import Country from "./Country.mjs";
 
 loadHeaderFooter();
 
 const externalServices = new ExternalServices();
-externalServices.init();
+const country = new Country();
 
-const foreCastData = await externalServices.hourlyForecastData();
+externalServices.init();
+country.showCountryDropDown();
+
+const foreCastData = externalServices.hourlyForecastData().then(
+    result => createWeatherHTML(result)
+);
 
 function renderForecastData(foreCastData) {
 
-    createWeatherHTML(foreCastData);
+    ;
 
     
 }
 
 async function createWeatherHTML(weatherData) {
 
-    let coutryInfo = await externalServices.findCountryInfo(weatherData.city.name, 5);
+    const weatherDiv = document.getElementById('weather');
+
+    while (weatherDiv.firstChild) {
+        weatherDiv.removeChild(weatherDiv.firstChild);
+    }
+
+
+    // ;
   
     const weatherContainer = document.createElement('div');
     weatherContainer.classList.add('weather-container');
@@ -41,7 +54,7 @@ async function createWeatherHTML(weatherData) {
       weatherBox.appendChild(img);
   
       const temperature = document.createElement('p');
-      temperature.textContent = `Temperature: ${weatherData.list[i].temp}`;
+      temperature.textContent = `Temperature: ${weatherData.list[i].main.temp}`;
       weatherBox.appendChild(temperature);
   
       const description = document.createElement('p');
@@ -51,8 +64,30 @@ async function createWeatherHTML(weatherData) {
       weatherContainer.appendChild(weatherBox);
     }
   
-    const weatherDiv = document.getElementById('weather');
+    
     weatherDiv.appendChild(weatherContainer);
   }
 
-renderForecastData(foreCastData);
+document.querySelector("#locationBtn").addEventListener('click', (e) => {
+    e.preventDefault();
+
+    const form = document.forms["location"];
+
+    const json = formDataToJSON(form);
+
+    externalServices.hourlyForecastData(json.latitude, json.longitude).then(
+        function(result) {createWeatherHTML(result)}
+    );
+});
+
+document.querySelector("#countries").addEventListener('change', (e) => {
+
+    externalServices.findCountryInfo(e.target.value, 1).then(
+        result => {
+            externalServices.hourlyForecastData(result[0].lat, result[0].lon).then(
+                function(result) {createWeatherHTML(result)}
+            );
+        }
+    );
+    
+});
